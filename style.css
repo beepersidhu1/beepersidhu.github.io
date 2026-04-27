@@ -1,0 +1,1798 @@
+/* ============================================================
+   ZOOL 401 – Invertebrate Zoology
+   style.css
+   ============================================================ */
+
+/* ---------- Reset & Base ---------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* ── Learning Mode (default) – deep dark + blue accent ── */
+  --color-bg: #0d1117;
+  --color-surface: #161b22;
+  --color-border: #30363d;
+  --color-primary: #58a6ff;
+  --color-primary-light: #79c0ff;
+  --color-primary-dark: #1f6feb;
+  --color-accent: #58a6ff;
+  --color-text: #e6edf3;
+  --color-text-muted: #8b949e;
+
+  /* ── Testing Mode – same darkness, violet/purple accent ── */
+  --color-test-bg: #0d0d1a;
+  --color-test-surface: #12121f;
+  --color-test-text: #e2e0ff;
+  --color-test-primary: #c084fc;
+  --color-test-border: #2d2b55;
+
+  --font-main: 'Segoe UI', system-ui, sans-serif;
+  --radius: 8px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.4);
+  --transition: 0.3s ease;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  transition: background-color var(--transition), color var(--transition);
+}
+
+/* ---------- Testing Mode Overrides ---------- */
+body.testing-mode {
+  background-color: var(--color-test-bg);
+  color: var(--color-test-text);
+}
+
+body.testing-mode #site-header {
+  background-color: var(--color-test-surface); /* JS overrides inline on scroll */
+  border-bottom-color: var(--color-test-border);
+}
+
+body.testing-mode #site-header h1 {
+  color: var(--color-test-primary);
+}
+
+body.testing-mode #mode-indicator {
+  background: rgba(192,132,252,0.12);
+  color: var(--color-test-primary);
+  border-color: rgba(192,132,252,0.25);
+}
+
+body.testing-mode .section-title {
+  color: var(--color-test-primary);
+  border-bottom-color: var(--color-test-border);
+}
+
+body.testing-mode section,
+body.testing-mode #summary-table-container {
+  background-color: var(--color-test-surface);
+  border-color: var(--color-test-border);
+}
+
+body.testing-mode table th {
+  background-color: #1e1a3a;
+  color: var(--color-test-primary);
+}
+
+body.testing-mode table td,
+body.testing-mode table th {
+  border-color: var(--color-test-border);
+}
+
+body.testing-mode footer {
+  background-color: var(--color-test-surface);
+  border-top-color: var(--color-test-border);
+  color: var(--color-test-primary);
+}
+
+body.testing-mode .placeholder-text {
+  color: #5b5480;
+}
+
+body.testing-mode .clade-node {
+  background-color: var(--color-test-surface);
+  border-color: var(--color-test-primary);
+  color: var(--color-test-text);
+}
+
+body.testing-mode .clade-node:hover,
+body.testing-mode .clade-node.clickable:hover {
+  background-color: rgba(192,132,252,0.15);
+  color: var(--color-test-primary);
+  box-shadow: 0 4px 14px rgba(192,132,252,0.2);
+}
+
+/* ---------- Mode Toggle ---------- */
+#mode-toggle-container {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-surface);
+  padding: 6px 12px;
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--color-border);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+body.testing-mode #mode-toggle-container {
+  background: var(--color-test-surface);
+  border-color: var(--color-test-border);
+}
+
+.mode-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition: color var(--transition);
+}
+
+body.testing-mode .mode-label {
+  color: var(--color-test-primary);
+}
+
+#label-learning.active,
+#label-testing.active {
+  color: var(--color-primary-light);
+}
+
+body.testing-mode #label-learning.active,
+body.testing-mode #label-testing.active {
+  color: var(--color-test-primary);
+}
+
+/* Toggle switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: var(--color-primary-dark);
+  border-radius: 999px;
+  transition: background-color var(--transition);
+}
+
+.slider::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #e6edf3;
+  border-radius: 50%;
+  transition: transform var(--transition);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+input:checked + .slider {
+  background-color: #4a2d8a;
+}
+
+input:checked + .slider::before {
+  transform: translateX(18px);
+}
+
+/* ---------- Header ---------- */
+#site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;              /* hero height — JS lerps this on scroll */
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  border-bottom: 2px solid transparent;   /* JS lerps opacity */
+  background-color: var(--color-surface); /* JS lerps to rgba on scroll */
+  transition: background-color var(--transition), border-color var(--transition);
+}
+
+/* Fully hidden — triggered by toggle button click */
+#site-header.header-hidden {
+  height: 0 !important;
+  border-bottom: none !important;
+}
+
+/* Flex column holding h1 + h2 */
+.header-titles {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;                  /* JS lerps this */
+}
+
+#site-header h1 {
+  font-size: min(3.5rem, 9vw); /* hero size — JS overrides dynamically */
+  letter-spacing: 0.05em;
+  font-weight: 800;
+  color: var(--color-primary-light);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+#site-header h2 {
+  font-size: min(1.4rem, 4vw); /* hero size — JS overrides dynamically */
+  font-weight: 400;
+  opacity: 0.75;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+#mode-indicator {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgba(88,166,255,0.12);
+  color: var(--color-primary-light);
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(88,166,255,0.25);
+  transition: opacity var(--transition);
+  white-space: nowrap;
+}
+
+/* ── Header collapse/expand toggle ── */
+#header-toggle {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 150;
+  display: none;           /* JS shows this when compact */
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+#header-toggle:hover {
+  background: rgba(88,166,255,0.12);
+  border-color: var(--color-primary);
+  color: var(--color-primary-light);
+}
+
+body.testing-mode #header-toggle {
+  background: var(--color-test-surface);
+  border-color: var(--color-test-border);
+  color: var(--color-test-primary);
+}
+
+body.testing-mode #header-toggle:hover {
+  background: rgba(192,132,252,0.12);
+  border-color: var(--color-test-primary);
+}
+
+/* ---------- Main Layout ---------- */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* ---------- Sections ---------- */
+section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  box-shadow: var(--shadow);
+  scroll-margin-top: 80px;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--color-border);
+  margin-bottom: 20px;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.placeholder-text {
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 24px 0;
+}
+
+/* ---------- Cladistics Tree Header Row ---------- */
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--color-border);
+  margin-bottom: 20px;
+  transition: border-color var(--transition);
+}
+
+/* Remove the bottom border/margin that .section-title normally adds on its own */
+.section-title-row .section-title {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+body.testing-mode .section-title-row {
+  border-bottom-color: var(--color-test-border);
+}
+
+/* Fullscreen toggle button */
+#tree-fullscreen-btn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 5px 9px;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  flex-shrink: 0;
+}
+
+#tree-fullscreen-btn:hover {
+  background: rgba(88,166,255,0.12);
+  border-color: var(--color-primary);
+  color: var(--color-primary-light);
+}
+
+body.testing-mode #tree-fullscreen-btn {
+  border-color: var(--color-test-border);
+  color: var(--color-test-primary);
+}
+
+body.testing-mode #tree-fullscreen-btn:hover {
+  background: rgba(192,132,252,0.12);
+  border-color: var(--color-test-primary);
+}
+
+/* ── Fullscreen state ── */
+#cladistics-section.fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 600;  /* above fixed header (z-index: 80) */
+  border-radius: 0;
+  border: none;
+  margin: 0;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#cladistics-section.fullscreen #cladistics-tree {
+  flex: 1;
+  overflow: auto;
+  padding-bottom: 32px;
+}
+
+/* ---------- Cladistics Tree ---------- */
+#cladistics-tree {
+  overflow-x: auto;
+  padding: 16px 0 24px;
+  min-height: 100px;
+}
+
+/* Reset */
+.clade-tree-root,
+.clade-tree-root ul,
+.clade-tree-root li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Root ul: centre when it fits; scroll edge-to-edge when it doesn't */
+.clade-tree-root {
+  display: flex;
+  justify-content: center;
+  width: max-content;   /* expands to full tree width when overflowing */
+  min-width: 100%;      /* fills container when tree is narrower */
+  padding: 0 24px;      /* breathing room at both scroll edges */
+  box-sizing: border-box;
+}
+
+/* Every li is a flex column centred on its axis */
+.clade-tree-root li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* Children ul = horizontal row of siblings */
+/* No padding-top here – the .tree-toggle div provides the gap */
+.clade-tree-root li > ul {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  padding-top: 0;
+}
+
+/* ul::before is no longer used – visual handled by .tree-toggle */
+.clade-tree-root li > ul::before {
+  display: none;
+}
+
+/* Each child li: minimal side padding so bars hug the nodes */
+.clade-tree-root li > ul > li {
+  padding: 14px 6px 0;
+}
+
+/* ── Clickable vertical connector (parent → horizontal bar) ── */
+.tree-toggle {
+  width: 20px;          /* wider hit zone than the 2 px visual */
+  height: 14px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* The visible 2 px line */
+.tree-toggle::before {
+  content: '';
+  width: 2px;
+  height: 14px;
+  background: var(--color-primary-light);
+  border-radius: 1px;
+  transition: background var(--transition);
+}
+
+/* Small chevron shown at the bottom when collapsed */
+.tree-toggle::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid transparent;
+  transition: border-top-color var(--transition);
+}
+
+/* Hover: brighten the line */
+.tree-toggle:hover::before {
+  background: var(--color-primary);
+}
+
+/* Collapsed state */
+.clade-tree-root li.collapsed > .tree-toggle::before {
+  background: var(--color-primary);
+}
+.clade-tree-root li.collapsed > .tree-toggle::after {
+  border-top-color: var(--color-primary);
+}
+.clade-tree-root li.collapsed > ul {
+  display: none;
+}
+
+/* ── Horizontal connector bar ── */
+/* All non-only-children get a horizontal segment */
+.clade-tree-root li > ul > li:not(:only-child)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  height: 2px;
+  background: var(--color-primary-light);
+}
+/* First of many → centre to right edge */
+.clade-tree-root li > ul > li:first-child:not(:last-child)::before {
+  left: 50%;
+  right: 0;
+}
+/* Last of many → left edge to centre */
+.clade-tree-root li > ul > li:last-child:not(:first-child)::before {
+  left: 0;
+  right: 50%;
+}
+/* Middle children → full width */
+.clade-tree-root li > ul > li:not(:first-child):not(:last-child)::before {
+  left: 0;
+  right: 0;
+}
+
+/* Vertical drop from horizontal bar down to each child node */
+.clade-tree-root li > ul > li::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 14px;
+  background: var(--color-primary-light);
+}
+
+/* ── Labelled clade node box ── */
+.clade-node {
+  background: var(--color-bg);
+  border: 2px solid var(--color-primary-light);
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  transition: background var(--transition), border-color var(--transition), transform 0.15s;
+  cursor: default;
+  user-select: none;
+}
+
+.clade-node.unimportant {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.clade-node.clickable {
+  cursor: pointer;
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+}
+
+.clade-node.clickable:hover {
+  background: rgba(88,166,255,0.15);
+  color: var(--color-primary-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(88,166,255,0.2);
+}
+
+/* Testing-mode connector colours */
+body.testing-mode .clade-tree-root li > ul > li::before,
+body.testing-mode .clade-tree-root li > ul > li::after,
+body.testing-mode .tree-toggle::before {
+  background: var(--color-test-primary);
+}
+
+body.testing-mode .tree-toggle:hover::before,
+body.testing-mode .clade-tree-root li.collapsed > .tree-toggle::before {
+  background: var(--color-test-primary);
+}
+
+body.testing-mode .clade-tree-root li.collapsed > .tree-toggle::after {
+  border-top-color: var(--color-test-primary);
+}
+
+body.testing-mode .clade-node.unimportant {
+  border-color: var(--color-test-border);
+  color: #6b6490;
+}
+
+/* ── Basal Bypass Toggle (Animalia → Bilateria shortcut) ──────── */
+/* Appears instead of the normal tree-toggle when basalHidden = true. */
+
+.basal-bypass-toggle {
+  width: 28px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* Dashed vertical line */
+.basal-bypass-toggle::before {
+  content: '';
+  width: 2px;
+  height: 100%;
+  border-radius: 1px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--color-primary-light) 0px,
+    var(--color-primary-light) 5px,
+    transparent 5px,
+    transparent 9px
+  );
+  opacity: 0.65;
+  transition: opacity var(--transition);
+}
+
+/* Floating hint label that appears to the right on hover */
+.basal-bypass-toggle::after {
+  content: '· · · basal clades hidden';
+  position: absolute;
+  left: calc(50% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.58rem;
+  font-family: var(--font-main);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  letter-spacing: 0.03em;
+}
+
+.basal-bypass-toggle:hover::before {
+  opacity: 1;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--color-primary) 0px,
+    var(--color-primary) 5px,
+    transparent 5px,
+    transparent 9px
+  );
+}
+
+.basal-bypass-toggle:hover::after {
+  opacity: 1;
+}
+
+body.testing-mode .basal-bypass-toggle::before {
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--color-test-primary) 0px,
+    var(--color-test-primary) 5px,
+    transparent 5px,
+    transparent 9px
+  );
+}
+
+body.testing-mode .basal-bypass-toggle:hover::before {
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--color-test-primary) 0px,
+    var(--color-test-primary) 5px,
+    transparent 5px,
+    transparent 9px
+  );
+  opacity: 1;
+}
+
+body.testing-mode .basal-bypass-toggle::after {
+  color: #6b6490;
+}
+
+/* Animalia toggle when basal clades are fully expanded (basalHidden = false).
+   The chevron ::after is invisible (no collapsed state), just the line. */
+.basal-expand-toggle::after {
+  display: none;
+}
+
+/* ── Bilateria Basal Trigger ──────────────────────────────────── */
+/* Absolutely-positioned overlay that covers the ::after connector */
+/* line above the Bilateria node, making it clickable.             */
+
+.bilateria-basal-trigger {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 14px;   /* exact height of the li > ul > li::after connector */
+  cursor: pointer;
+  z-index: 2;
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+
+.bilateria-basal-trigger:hover {
+  background: rgba(88, 166, 255, 0.35);
+}
+
+body.testing-mode .bilateria-basal-trigger:hover {
+  background: rgba(192, 132, 252, 0.35);
+}
+
+/* ---------- Summary Table ---------- */
+#summary-table-container {
+  overflow-x: auto;
+}
+
+/* ── Main summary table ── */
+#summary-table {
+  width: 100%;
+  min-width: 1200px;   /* wider than the container → triggers h-scroll */
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  table-layout: fixed;
+}
+
+/* 6 equal columns (1 clade + 5 data) → 200 px each */
+#summary-table .summary-th-clade,
+#summary-table .summary-col-header {
+  width: 200px;
+}
+
+/* Clade header cell */
+#summary-table .summary-th-clade {
+  background-color: #1c2333;
+  color: var(--color-primary-light);
+  padding: 10px 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: left;
+}
+
+/* Column header cells (clickable) */
+.summary-col-header {
+  background-color: #1c2333;
+  color: var(--color-primary-light);
+  padding: 10px 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  user-select: none;
+  text-align: center;
+  white-space: nowrap;
+  transition: background var(--transition), color var(--transition);
+}
+
+.summary-col-header:hover {
+  background-color: rgba(88, 166, 255, 0.15);
+  color: var(--color-primary-light);
+}
+
+/* Chevron indicator */
+.col-chevron {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 0.65rem;
+  opacity: 0.75;
+  transition: transform var(--transition);
+}
+
+.summary-col-header:not(.col-collapsed) .col-chevron::after { content: '▲'; }
+.summary-col-header.col-collapsed      .col-chevron::after { content: '▼'; }
+
+/* Clade name cell (first column) */
+.summary-clade-cell {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+/* Clickable clade name */
+.clade-row-link {
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: color var(--transition);
+  text-decoration: none;
+}
+
+.clade-row-link:hover {
+  color: var(--color-primary-light);
+  text-decoration: underline;
+}
+
+/* Data cells */
+.summary-data-cell {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+  transition: padding var(--transition);
+}
+
+/* Collapsed column: hide content, collapse padding */
+.summary-data-cell.col-collapsed {
+  padding: 0;
+  overflow: hidden;
+}
+
+.summary-data-cell.col-collapsed .cell-content {
+  display: none;
+}
+
+/* Row hover (only on clade cell + visible data cells) */
+#summary-table tbody tr:hover .summary-clade-cell,
+#summary-table tbody tr:hover .summary-data-cell:not(.col-collapsed) {
+  background-color: rgba(88, 166, 255, 0.06);
+}
+
+/* ── Classification mini-table (inside each data cell) ── */
+.classification-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.85rem;
+}
+
+/* Two equal columns */
+.classification-table td {
+  width: 50%;
+  padding: 5px 8px;
+  border: none;
+  vertical-align: middle;
+}
+
+/* Category column: plain text, muted */
+.classification-table .class-category {
+  color: var(--color-text-muted);
+  font-weight: 500;
+  padding-right: 10px;
+}
+
+/* Info column: outlined box, centred text */
+.classification-table .class-info {
+  border: 1px solid var(--color-border) !important;
+  border-radius: 4px;
+  text-align: center;
+  color: var(--color-text);
+  background: var(--color-bg);
+  min-height: 24px;
+}
+
+/* No hover on classification rows */
+.classification-table tbody tr:hover {
+  background: transparent;
+}
+
+/* Subclade label – small italic text above the value in multi-select rows */
+.subclade-label {
+  font-size: 0.68rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+body.testing-mode .subclade-label {
+  color: #5b5480;
+}
+
+/* Value span inside info cell */
+.info-value {
+  display: block;
+  line-height: 1.3;
+}
+
+/* Optional general text section below classification table */
+.cell-text {
+  display: none; /* hidden until content is added */
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  line-height: 1.55;
+}
+
+.cell-text:not(:empty) {
+  display: block;
+}
+
+/* General text is never shown in testing mode */
+body.testing-mode .cell-text {
+  display: none !important;
+}
+
+/* ── Testing-mode classification selects ── */
+.class-info-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--color-test-bg);
+  border: 1px solid var(--color-test-primary);
+  border-radius: 4px;
+  color: var(--color-test-text);
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 3px 22px 3px 7px;
+  width: 100%;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color var(--transition), background var(--transition);
+  /* Custom chevron */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23c084fc'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+}
+
+.class-info-select:focus {
+  outline: none;
+  border-color: var(--color-test-primary);
+  box-shadow: 0 0 0 2px rgba(192,132,252,0.25);
+}
+
+.class-info-select:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+/* Correct / wrong colouring on the td.class-info after check */
+.class-info.info-correct {
+  border: 1px solid #22c55e !important;
+  background: rgba(34,197,94,0.10) !important;
+  border-radius: 4px;
+}
+
+.class-info.info-correct .class-info-select {
+  border-color: #22c55e;
+  background-color: rgba(34,197,94,0.12);
+  color: #4ade80;
+}
+
+.class-info.info-wrong {
+  border: 1px solid #ef4444 !important;
+  background: rgba(239,68,68,0.10) !important;
+  border-radius: 4px;
+}
+
+.class-info.info-wrong .class-info-select {
+  border-color: #ef4444;
+  background-color: rgba(239,68,68,0.12);
+  color: #f87171;
+}
+
+/* Reveal label – shown after check for wrong / blank answers */
+.class-reveal-answer {
+  display: none;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #fca5a5;
+  text-align: center;
+  margin-top: 3px;
+  line-height: 1.2;
+}
+
+.class-reveal-answer.visible {
+  display: block;
+}
+
+/* ── Testing-mode overrides for summary table ── */
+body.testing-mode .summary-col-header,
+body.testing-mode #summary-table .summary-th-clade {
+  background-color: #1e1a3a;
+  color: var(--color-test-primary);
+}
+
+body.testing-mode .summary-col-header:hover {
+  background-color: rgba(192, 132, 252, 0.15);
+}
+
+body.testing-mode .summary-clade-cell,
+body.testing-mode .summary-data-cell {
+  border-bottom-color: var(--color-test-border);
+}
+
+body.testing-mode .clade-row-link {
+  color: var(--color-test-primary);
+}
+
+body.testing-mode .classification-table .class-info {
+  border-color: var(--color-test-border) !important;
+  background: var(--color-test-bg);
+}
+
+body.testing-mode #summary-table tbody tr:hover .summary-clade-cell,
+body.testing-mode #summary-table tbody tr:hover .summary-data-cell:not(.col-collapsed) {
+  background-color: rgba(192, 132, 252, 0.06);
+}
+
+/* ---------- Topic Sections ---------- */
+#topics-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.topic-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  box-shadow: var(--shadow);
+  scroll-margin-top: 80px;  /* clears the compact 64px header */
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.topic-section h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--color-border);
+}
+
+body.testing-mode .topic-section {
+  background: var(--color-test-surface);
+  border-color: var(--color-test-border);
+}
+
+body.testing-mode .topic-section h3 {
+  color: var(--color-test-primary);
+  border-bottom-color: var(--color-test-border);
+}
+
+/* ---------- Footer ---------- */
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+/* ---------- Check Answer Button ---------- */
+#check-answer-btn {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 18px rgba(34,197,94,0.45);
+  z-index: 300;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+}
+
+body.testing-mode #check-answer-btn {
+  display: flex;
+}
+
+#check-answer-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 24px rgba(34,197,94,0.55);
+}
+
+#check-answer-btn:active {
+  transform: scale(0.97);
+}
+
+#check-answer-btn.checked {
+  background: #15803d;
+  cursor: default;
+}
+
+/* ---------- Testing Mode – Clade Inputs ---------- */
+
+/* Wrapper for testable nodes (replaces the plain clade-node box) */
+.clade-test-node {
+  background: var(--color-test-bg);
+  border: 2px solid var(--color-test-primary);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 90px;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+/* Text input inside the node */
+.clade-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-main);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-test-text);
+  text-align: center;
+  width: 100%;
+  min-width: 80px;
+  cursor: text;
+}
+
+.clade-input::placeholder {
+  color: #5b5480;
+  font-weight: 400;
+}
+
+/* Correct answer */
+.clade-test-node.correct {
+  border-color: #22c55e;
+  background: rgba(34,197,94,0.12);
+}
+.clade-test-node.correct .clade-input {
+  color: #4ade80;
+}
+
+/* Wrong answer */
+.clade-test-node.wrong {
+  border-color: #ef4444;
+  background: rgba(239,68,68,0.12);
+}
+.clade-test-node.wrong .clade-input {
+  color: #f87171;
+}
+
+/* Revealed correct-answer label (shown after Check Answer) */
+.clade-reveal-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: 1.2;
+  display: none;
+}
+
+.clade-test-node.wrong .clade-reveal-label {
+  color: #fca5a5;
+}
+
+.clade-test-node.correct .clade-reveal-label {
+  display: none; /* correct answers don't need the reveal */
+}
+
+/* Right-click peeked state (revealed without grading) */
+.clade-test-node.peeked {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.clade-test-node.peeked .clade-input {
+  color: #fbbf24;
+}
+
+.clade-test-node.peeked .clade-reveal-label {
+  color: #fcd34d;
+}
+
+/* Common name – sits below the clade box, learning mode only */
+.clade-common-name {
+  font-size: 0.68rem;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+.clade-common-name.hidden-until-checked {
+  display: none;
+}
+
+/* Unimportant placeholder node in testing mode ("-" box) */
+.clade-node.test-dash {
+  border-style: dashed;
+  border-color: var(--color-test-border);
+  color: #5b5480;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+}
+
+/* ---------- Section Cladistic Subtrees ---------- */
+
+.section-tree-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+}
+
+body.testing-mode .section-tree-label {
+  color: #6b6490;
+}
+
+.section-tree-container {
+  overflow-x: auto;
+  padding: 12px 0 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+body.testing-mode .section-tree-container {
+  border-bottom-color: var(--color-test-border);
+}
+
+/* Slightly more compact nodes inside section subtrees */
+.section-tree-root .clade-node {
+  font-size: 0.78rem;
+  padding: 6px 12px;
+}
+
+.section-tree-root .clade-test-node {
+  min-width: 80px;
+  padding: 5px 8px;
+}
+
+.section-tree-root .clade-input {
+  font-size: 0.78rem;
+  min-width: 70px;
+}
+
+/* ---------- Subsections (Platyhelminthes & future topics) ---------- */
+
+.subsection {
+  margin-top: 28px;
+}
+
+.subsection-heading {
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-primary-light);
+  margin-bottom: 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
+  transition: color var(--transition), border-color var(--transition);
+}
+
+body.testing-mode .subsection-heading {
+  color: var(--color-test-primary);
+  border-bottom-color: var(--color-test-border);
+}
+
+/* ---------- Topic Tables (anatomy, etc.) ---------- */
+
+.topic-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  table-layout: fixed;
+}
+
+.topic-table thead th {
+  background-color: #1c2333;
+  color: var(--color-primary-light);
+  padding: 9px 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: left;
+  border: 1px solid var(--color-border);
+}
+
+body.testing-mode .topic-table thead th {
+  background-color: #1e1a3a;
+  color: var(--color-test-primary);
+  border-color: var(--color-test-border);
+}
+
+.topic-table tbody td {
+  padding: 9px 14px;
+  border: 1px solid var(--color-border);
+  vertical-align: top;
+  line-height: 1.55;
+  color: var(--color-text);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+body.testing-mode .topic-table tbody td {
+  border-color: var(--color-test-border);
+  color: var(--color-test-text);
+  background: var(--color-test-bg);
+}
+
+.topic-table tbody tr:hover td {
+  background-color: rgba(88, 166, 255, 0.06);
+}
+
+body.testing-mode .topic-table tbody tr:hover td {
+  background-color: rgba(192, 132, 252, 0.06);
+}
+
+/* Structure column – slightly narrower */
+.table-structure-cell {
+  width: 180px;
+  font-weight: 600;
+}
+
+.table-description-cell {
+  color: var(--color-text-muted);
+}
+
+body.testing-mode .table-description-cell {
+  color: #9490b8;
+}
+
+/* Testing-mode: text input inside structure cell */
+.topic-table-input {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--color-test-primary);
+  outline: none;
+  font-family: var(--font-main);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-test-text);
+  width: 100%;
+  padding: 2px 4px;
+  transition: border-color var(--transition);
+}
+
+.topic-table-input::placeholder {
+  color: #5b5480;
+  font-weight: 400;
+}
+
+.topic-table-input:focus {
+  border-bottom-color: var(--color-test-primary);
+  box-shadow: 0 2px 0 rgba(192, 132, 252, 0.25);
+}
+
+.topic-table-input:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+/* Reveal label – shown after Check Answer on wrong answers */
+.topic-table-reveal {
+  display: none;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #fca5a5;
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+.topic-table-reveal.visible {
+  display: block;
+}
+
+/* Correct / wrong feedback on the cell itself */
+.table-cell-correct {
+  border-color: #22c55e !important;
+  background: rgba(34, 197, 94, 0.10) !important;
+}
+
+.table-cell-correct .topic-table-input {
+  color: #4ade80;
+  border-bottom-color: #22c55e;
+}
+
+.table-cell-wrong {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.10) !important;
+}
+
+.table-cell-wrong .topic-table-input {
+  color: #f87171;
+  border-bottom-color: #ef4444;
+}
+
+/* ---------- Testable Image (Excretion etc.) ---------- */
+
+.testable-image-container {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.testable-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+}
+
+body.testing-mode .testable-image {
+  border-color: var(--color-test-border);
+}
+
+/* Placeholder shown when no image path is set yet */
+.image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 160px;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+  padding: 24px;
+  text-align: center;
+}
+
+body.testing-mode .image-placeholder {
+  border-color: var(--color-test-border);
+  color: #6b6490;
+}
+
+/* Overlay label – rectangle positioned absolutely over the image */
+.image-label {
+  position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Learning mode: solid filled box showing the label text */
+.image-label-text {
+  background: rgb(13, 17, 23);
+  border: 2px solid var(--color-primary);
+  border-radius: 3px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-label-text span {
+  color: var(--color-primary-light);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.2;
+  padding: 2px 3px;
+  pointer-events: none;
+  word-break: break-word;
+}
+
+body.testing-mode .image-label-text {
+  background: rgb(13, 13, 26);
+  border-color: var(--color-test-primary);
+}
+
+body.testing-mode .image-label-text span {
+  color: var(--color-test-primary);
+}
+
+/* Testing mode: blank box with centred input */
+.image-label-blank {
+  background: rgb(13, 13, 26);
+  border: 2px solid var(--color-test-primary);
+  border-radius: 3px;
+}
+
+.image-label-input {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  outline: none;
+  font-family: var(--font-main);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-test-text);
+  text-align: center;
+  padding: 2px 3px;
+}
+
+.image-label-input::placeholder {
+  color: #5b5480;
+  font-weight: 400;
+}
+
+.image-label-input:focus {
+  box-shadow: none !important;
+}
+
+/* Correct / wrong feedback on image label rectangles */
+.image-label.table-cell-correct {
+  border-color: #22c55e !important;
+  background: rgba(34, 197, 94, 0.18) !important;
+}
+
+.image-label.table-cell-correct .image-label-input {
+  color: #4ade80;
+}
+
+.image-label.table-cell-wrong {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.18) !important;
+}
+
+.image-label.table-cell-wrong .image-label-input {
+  color: #f87171;
+}
+
+/* Reveal sits below the input inside the box */
+.image-label .topic-table-reveal {
+  font-size: 0.65rem;
+  margin-top: 1px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* ---------- Testable Text (Cloze) ---------- */
+
+/* Container for one or more testable paragraphs */
+.testable-text-section {
+  margin-top: 4px;
+}
+
+/* Each paragraph of cloze text */
+.testable-text {
+  font-size: 0.95rem;
+  line-height: 1.9;
+  color: var(--color-text);
+  margin-bottom: 10px;
+}
+
+body.testing-mode .testable-text {
+  color: var(--color-test-text);
+}
+
+/* Learning mode: highlighted answer span */
+.cloze-answer {
+  color: var(--color-primary-light);
+  font-weight: 600;
+  background: rgba(88, 166, 255, 0.12);
+  border: 1px solid rgba(88, 166, 255, 0.3);
+  border-radius: 4px;
+  padding: 1px 7px;
+}
+
+/* Testing mode: wrapper around the select + reveal */
+.cloze-item {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  gap: 2px;
+}
+
+/* The inline dropdown select */
+.cloze-select {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-block;
+  background: var(--color-test-bg);
+  border: 1px solid var(--color-test-primary);
+  border-radius: 4px;
+  color: var(--color-test-text);
+  font-family: var(--font-main);
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 2px 26px 2px 9px;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+  /* Custom chevron */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23c084fc'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+}
+
+.cloze-select:focus {
+  outline: none;
+  border-color: var(--color-test-primary);
+  box-shadow: 0 0 0 2px rgba(192, 132, 252, 0.25);
+}
+
+.cloze-select:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+/* Correct state */
+.cloze-select.cloze-correct {
+  border-color: #22c55e;
+  background-color: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2322c55e'/%3E%3C/svg%3E");
+}
+
+/* Wrong state */
+.cloze-select.cloze-wrong {
+  border-color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23ef4444'/%3E%3C/svg%3E");
+}
+
+/* Reveal label – shown after Check Answer on wrong / blank */
+.cloze-reveal {
+  display: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #fca5a5;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.cloze-reveal.visible {
+  display: block;
+}
+
+/* ---------- Symbiosis Table ---------- */
+
+.symbiosis-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  table-layout: fixed;
+}
+
+/* Hide column headers visually while keeping them in the DOM */
+.symbiosis-table thead {
+  display: none;
+}
+
+.symbiosis-table tbody td {
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  vertical-align: middle;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+body.testing-mode .symbiosis-table tbody td {
+  border-color: var(--color-test-border);
+}
+
+/* Symbiosis Type column */
+.symbiosis-type-cell {
+  width: 45%;
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: left;
+}
+
+body.testing-mode .symbiosis-type-cell {
+  color: var(--color-test-text);
+  background: var(--color-test-bg);
+}
+
+/* Species A / B symbol cells */
+.symbiosis-species-cell {
+  width: 27.5%;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+/* + → green */
+.symbiosis-cell-positive {
+  background-color: rgba(34, 197, 94, 0.22);
+  color: #4ade80;
+}
+
+/* 0 → grey */
+.symbiosis-cell-neutral {
+  background-color: rgba(120, 120, 130, 0.22);
+  color: #9ca3af;
+}
+
+/* − → red */
+.symbiosis-cell-negative {
+  background-color: rgba(239, 68, 68, 0.22);
+  color: #f87171;
+}
+
+/* Row hover only for the type cell (species cells keep their colour) */
+.symbiosis-table tbody tr:hover .symbiosis-type-cell {
+  background-color: rgba(88, 166, 255, 0.06);
+}
+
+body.testing-mode .symbiosis-table tbody tr:hover .symbiosis-type-cell {
+  background-color: rgba(192, 132, 252, 0.06);
+}
+
+/* Legend line beneath the table */
+.symbiosis-legend {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+body.testing-mode .symbiosis-legend {
+  color: #6b6490;
+}
+
+.symbiosis-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.symbiosis-legend-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.symbiosis-legend-badge.badge-positive {
+  background: rgba(34, 197, 94, 0.22);
+  color: #4ade80;
+}
+
+.symbiosis-legend-badge.badge-neutral {
+  background: rgba(120, 120, 130, 0.22);
+  color: #9ca3af;
+}
+
+.symbiosis-legend-badge.badge-negative {
+  background: rgba(239, 68, 68, 0.22);
+  color: #f87171;
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+  main { padding: 20px 14px 48px; }
+  section { padding: 20px 18px; }
+  .topic-section { padding: 20px 18px; }
+}
